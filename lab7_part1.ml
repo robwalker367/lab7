@@ -56,13 +56,26 @@ IEEE Floating Point standard described at
 temporary value pending your putting in appropriate ones.)
 ......................................................................*)
 
+(* Most of the pertinent math functions are already available in the
+Pervasives module. We can just use them here. And since functions are
+first-class values in OCaml, you don't need to replicate the argument
+structure in the definitions. For example, there's no need for 
+
+    let cos x = cos x     . 
+
+The only function not already available is max; we generated a simple
+implementation using a partially applied fold on non-empty lists. *)
+    
 module Math : MATH =
   struct
-    let pi = nan
-    let cos _ = nan
-    let sin _ = nan
-    let sum _ _ = nan
-    let max _ = None
+    let pi = 3.14159
+    let cos = cos
+    let sin = sin
+    let sum = (+.)
+    let max lst =
+      match lst with
+      | [] -> None
+      | hd :: tl -> Some (List.fold_left max hd tl)
   end ;;
 
 (*......................................................................
@@ -72,7 +85,7 @@ type float option. Name the resulting value "result". (Do not use a
 local open for this exercise.)
 ......................................................................*)
 
-let result = Some nan ;;
+let result = Math.max [Math.cos Math.pi; Math.sin Math.pi] ;;
 
 (*......................................................................
 Exercise 1C: Reimplement the computation from 1B above, now as
@@ -80,4 +93,8 @@ Exercise 1C: Reimplement the computation from 1B above, now as
 in a more succinct manner.
 ......................................................................*)
 
-let result_local_open = Some nan ;;
+let result_local_open =
+  let open Math in
+  max [cos pi; sin pi] ;;
+
+(* Isn't the version with the local open more readable?! *)
